@@ -4,7 +4,7 @@ on:
   push:
     paths:
       - 'frontend/**'
-      - '.github/workflows/docker-image.yml'
+      - '.github/workflows/docker-buld-push.yaml'
     branches: [ main ]
 
 jobs:
@@ -27,8 +27,8 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: ./frontend
-          file: ./frontend/Dockerfile
+          context: .
+          file: ./Dockerfile
           push: true
           tags: samuelzokovich/habit-frontend:latest
 
