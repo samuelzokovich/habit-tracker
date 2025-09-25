@@ -171,14 +171,37 @@ func habitLogsHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(habit.Logs)
 }
 
+// loggingMiddleware logs every HTTP request with method, path, and status code
+func loggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Wrap the ResponseWriter to capture status code
+		lrw := &loggingResponseWriter{ResponseWriter: w, statusCode: http.StatusOK}
+		start := time.Now()
+		next.ServeHTTP(lrw, r)
+		duration := time.Since(start)
+		log.Printf("%s %s %d %s", r.Method, r.URL.Path, lrw.statusCode, duration)
+	})
+}
+
+// loggingResponseWriter wraps http.ResponseWriter to capture status code
+type loggingResponseWriter struct {
+	http.ResponseWriter
+	statusCode int
+}
+
+func (lrw *loggingResponseWriter) WriteHeader(code int) {
+	lrw.statusCode = code
+	lrw.ResponseWriter.WriteHeader(code)
+}
+
 func main() {
 	// Public endpoints
-	http.HandleFunc("/health", healthHandler)
-	http.HandleFunc("/hello", helloHandler)
+	http.Handle("/health", loggingMiddleware(http.HandlerFunc(healthHandler)))
+	http.Handle("/hello", loggingMiddleware(http.HandlerFunc(helloHandler)))
 
 	// Protected endpoints (require JWT)
-	http.Handle("/api/habits", jwtAuthMiddleware(http.HandlerFunc(habitsHandler)))
-	http.Handle("/api/habits/", jwtAuthMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	http.Handle("/api/habits", loggingMiddleware(jwtAuthMiddleware(http.HandlerFunc(habitsHandler))))
+	http.Handle("/api/habits/", loggingMiddleware(jwtAuthMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Route based on path
 		if strings.HasSuffix(r.URL.Path, "/log") && r.Method == http.MethodPost {
 			habitLogHandler(w, r)
@@ -189,7 +212,7 @@ func main() {
 			return
 		}
 		habitByIDHandler(w, r)
-	})))
+	}))))
 
 	fmt.Println("Backend API server running on http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
