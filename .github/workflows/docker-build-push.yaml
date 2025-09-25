@@ -2,9 +2,6 @@ name: Build and Push Frontend Docker Image
 
 on:
   push:
-    paths:
-      - 'frontend/**'
-      - '.github/workflows/docker-buld-push.yaml'
     branches: [ main ]
 
 jobs:
