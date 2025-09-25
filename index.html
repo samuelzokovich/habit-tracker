@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Habit Tracker Frontend</title>
+  <style>
+    body { font-family: sans-serif; margin: 2em; }
+    .habit { border: 1px solid #ccc; padding: 1em; margin-bottom: 1em; }
+    .logs { font-size: 0.9em; color: #666; }
+  </style>
+</head>
+<body>
+  <h1>Habit Tracker</h1>
+  <div>
+    <h2>Add Habit</h2>
+    <form id="addHabitForm">
+      <input type="text" id="habitName" placeholder="Name" required>
+      <input type="text" id="habitDesc" placeholder="Description">
+      <button type="submit">Add</button>
+    </form>
+  </div>
+  <hr>
+  <h2>Your Habits</h2>
+  <div id="habits"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
